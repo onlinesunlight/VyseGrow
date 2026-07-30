@@ -1,0 +1,65 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build & Test Flutter Project
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Java environment (Required for Android builds)
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Set up Flutter SDK
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 4. Get dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Analyze code for quality/formatting issues
+      - name: Analyze code
+        run: flutter analyze
+
+      # 6. Run unit/widget tests
+      - name: Run tests
+        run: flutter test
+
+      # 7. Build Flutter Web
+      - name: Build Web
+        run: flutter build web --release
+
+      # 8. Build Android APK
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      # 9. Upload Artifacts (Optional: Save built Web output)
+      - name: Upload Web Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+
+      # 10. Upload Artifacts (Optional: Save APK output)
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
