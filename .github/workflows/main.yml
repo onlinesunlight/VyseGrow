@@ -2,49 +2,51 @@ name: Flutter CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build & Test Flutter Project
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Set up Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+    - name: Install Dependencies
+      run: flutter pub get
 
-      - name: Build Web
-        run: flutter build web --release
+    # 1. Build Android APK
+    - name: Build Android APK
+      run: flutter build apk --debug
 
-      # Release ki jagah Debug APK build kar rahe hain taaki signing error na aaye
-      - name: Build Android APK
-        run: flutter build apk --debug
+    # 2. Build Web
+    - name: Build Web
+      run: flutter build web
 
-      - name: Upload Web Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-release
-          path: build/web
+    # 3. Upload APK Artifact
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+    # 4. Upload Web Artifact
+    - name: Upload Web Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-release
+        path: build/web

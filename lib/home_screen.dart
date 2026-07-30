@@ -29,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchMarketData();
     _welcomeBannerFuture = WPService.fetchWelcomeBanner();
 
-    // Auto Refresh market data
     _marketTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
       if (mounted) {
         _fetchMarketDataSilently();
@@ -447,7 +446,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Row(
                         children: [
-                          // Bell Notification Button
                           IconButton(
                             icon: const Icon(
                               Icons.notifications_none_rounded,

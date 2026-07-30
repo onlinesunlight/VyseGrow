@@ -1,12 +1,7 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'wp_service.dart';
-
-// Web Compatibility Imports
-import 'dart:ui_web' as ui;
-import 'package:web/web.dart' as web;
 
 class PostDetailScreen extends StatefulWidget {
   final Map<String, dynamic> post;
@@ -21,10 +16,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   WebViewController? _controller;
   late String _currentTitle;
   late String _finalUrl;
-  late String _iframeViewType;
   bool _isLoading = true;
   int _loadingProgress = 0;
-  StreamSubscription? _webMessageSubscription;
 
   @override
   void initState() {
@@ -54,46 +47,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
 
     // 3. Platform Specific Handling
-    if (kIsWeb) {
-      _iframeViewType = 'iframe-view-${DateTime.now().millisecondsSinceEpoch}';
-
-      // Register HTML IFrame Element for Web Platform
-      ui.platformViewRegistry.registerViewFactory(_iframeViewType, (
-        int viewId,
-      ) {
-        final iframe = web.HTMLIFrameElement();
-        iframe.src = _finalUrl;
-        iframe.style.border = 'none';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-
-        return iframe;
-      });
-
-      // Listen to postMessage from Website JS (Web / Iframe)
-      _webMessageSubscription = web.window.onMessage.listen((
-        web.MessageEvent event,
-      ) {
-        if (event.data != null && mounted) {
-          final String message = event.data.toString();
-          // Filter out JSON strings or empty messages
-          if (message.isNotEmpty && !message.contains('{')) {
-            setState(() {
-              _currentTitle = WPService.parseHtmlTitle(message);
-            });
-          }
-        }
-      });
-
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      });
-    } else {
-      // Native WebViewController for Android & iOS Mobile Devices
+    if (!kIsWeb) {
       _controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.white)
@@ -119,7 +73,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   _isLoading = false;
                 });
 
-                // Fetch page title automatically via document.title evaluation
                 try {
                   final rawJsTitle = await _controller
                       ?.runJavaScriptReturningResult('document.title');
@@ -160,12 +113,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   @override
-  void dispose() {
-    _webMessageSubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
@@ -195,9 +142,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
               onPressed: () {
-                if (kIsWeb) {
-                  setState(() {});
-                } else {
+                if (!kIsWeb) {
                   _controller?.reload();
                 }
               },
@@ -216,7 +161,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             Expanded(
               child: kIsWeb
-                  ? HtmlElementView(viewType: _iframeViewType)
+                  ? const Center(
+                      child: Text(
+                        'Web Preview Not Supported directly in Mobile Mode',
+                      ),
+                    )
                   : WebViewWidget(controller: _controller!),
             ),
           ],

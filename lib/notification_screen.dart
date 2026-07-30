@@ -26,7 +26,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     if (url.isEmpty || url == '#') return;
 
-    // External link logic (if outside vysegrow)
     if (!url.contains('vysegrow.com')) {
       final Uri uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -35,7 +34,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       return;
     }
 
-    // Open inside Detail Screen Webview
     if (mounted) {
       Navigator.push(
         context,
