@@ -32,6 +32,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
@@ -55,8 +57,65 @@ class _MyAppState extends State<MyApp> {
     // Handle Foreground Notifications
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
-      if (message.notification != null) {
-        debugPrint('Notification Title: ${message.notification?.title}');
+
+      // Extract Title & Body
+      String title = message.notification?.title ?? 'Notification';
+      String body = message.notification?.body ?? '';
+
+      // Extract Image URL (from Android, Apple, or custom data payload)
+      String? imageUrl =
+          message.notification?.android?.imageUrl ??
+          message.notification?.apple?.imageUrl ??
+          message.data['image'];
+
+      debugPrint('Notification Title: $title');
+      debugPrint('Notification Body: $body');
+      debugPrint('Notification Image URL: $imageUrl');
+
+      // Show Dialog on Current Context
+      final currentContext = navigatorKey.currentContext;
+      if (currentContext != null) {
+        showDialog(
+          context: currentContext,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (body.isNotEmpty)
+                  Text(
+                    body,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                if (imageUrl != null && imageUrl.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     });
   }
@@ -64,6 +123,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'VyseGrow Capitals',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
