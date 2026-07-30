@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "725723078173",
+    "project_id": "vysegrow-capitals",
+    "storage_bucket": "vysegrow-capitals.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725723078173:android:94ebdc411423d10d0b30f4",
+        "android_client_info": {
+          "package_name": "com.vysegrow.capitals"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJo1sdaong0pOgllTyN-G0FVF9h62zwg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
