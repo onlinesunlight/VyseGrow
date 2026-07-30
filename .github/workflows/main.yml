@@ -29,20 +29,20 @@ jobs:
     - name: Install Dependencies
       run: flutter pub get
 
-    # 1. Build Android APK
-    - name: Build Android APK
-      run: flutter build apk --debug
+    # 1. Release APK Build (Smaller size, production ready)
+    - name: Build Android Release APK
+      run: flutter build apk --release --split-per-abi
 
     # 2. Build Web
     - name: Build Web
       run: flutter build web
 
-    # 3. Upload APK Artifact
+    # 3. Upload Release APK Artifact
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk
-        path: build/app/outputs/flutter-apk/app-debug.apk
+        name: app-release-apk
+        path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
     # 4. Upload Web Artifact
     - name: Upload Web Build Artifact
