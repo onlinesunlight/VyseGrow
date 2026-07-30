@@ -33,8 +33,9 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
+      # Release ki jagah Debug APK build kar rahe hain taaki signing error na aaye
       - name: Build Android APK
-        run: flutter build apk --release
+        run: flutter build apk --debug
 
       - name: Upload Web Build Artifact
         uses: actions/upload-artifact@v4
@@ -45,5 +46,5 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
